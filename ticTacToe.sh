@@ -19,3 +19,16 @@ function resettingBoard()
 }
 
 resettingBoard
+
+function letterAssignment()
+{
+	randomLetter=$((RANDOM%2))
+	if [[ $randomLetter -eq 0 ]]
+	then
+		player="O"
+	else
+		player="X"
+	fi
+}
+
+letterAssignment
