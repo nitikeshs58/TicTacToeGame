@@ -29,6 +29,20 @@ function letterAssignment()
 	else
 		player="X"
 	fi
+	echo $player
 }
 
 letterAssignment
+
+function tossToPlayFirst()
+{
+	randomToss=$((RANDOM%2))
+	if [[ $randomToss -eq 0 ]]
+	then
+		player1=$( letterAssignment )
+	else
+		player2=$( letterAssignment )
+	fi
+}
+
+tossToPlayFirst
