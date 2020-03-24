@@ -46,3 +46,18 @@ function tossToPlayFirst()
 }
 
 tossToPlayFirst
+
+function playBoard()
+{
+	echo -e "$===========$"
+	for (( i=1; i<=row; i++ ))
+	do
+		for (( j=1; j<=column+1; j++ ))
+		do
+			echo -e "| ${board[$i,$j]} \c"
+		done
+   echo -e "\n$===========$"		
+	done
+}
+
+playBoard
