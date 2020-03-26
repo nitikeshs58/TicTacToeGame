@@ -146,8 +146,8 @@ do
 		read -p "Enter column position: " columnPosition
 		playingGame $rowPosition $columnPosition
 	else
-		read -p "Enter row position: " rowPosition
-		read -p "Enter column position: " columnPosition
+		rowPosition=$((RANDOM%3+1))
+		columnPosition=$((RANDOM%3+1))
 		playingGame $rowPosition $columnPosition
 	fi
 done
