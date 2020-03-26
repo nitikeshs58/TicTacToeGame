@@ -3,16 +3,16 @@
 echo "Welcome to Tic Tac Toe game."
 
 declare -A board
-#variables
-row=3
-column=3
+#constants
+ROW=3
+COLUMN=3
 count=1
 
 function resettingBoard()
 {
-	for (( i=1; i<=$row; i++ ))
+	for (( i=1; i<=$ROW; i++ ))
 	do
-		for (( j=1; j<=$column; j++ ))
+		for (( j=1; j<=$COLUMN; j++ ))
 		do
 			board[$i,$j]="-"
 		done
@@ -36,8 +36,8 @@ function tossToPlayFirst()
 	randomToss=$((RANDOM%2))
 	if [[ $randomToss -eq 0 ]]
 	then
-		currentPlayer=$( letterAssignment $(()) ) #blank braces when we are not
-	else														#sending anything but returning something
+		currentPlayer=$( letterAssignment $(()) )
+	else
 		currentPlayer=$( letterAssignment $(()) )
 	fi
 }
@@ -45,9 +45,9 @@ function tossToPlayFirst()
 function playBoard()
 {
 	echo -e "$===========$"
-	for (( i=1; i<=row; i++ ))
+	for (( i=1; i<=ROW; i++ ))
 	do
-		for (( j=1; j<=column+1; j++ ))
+		for (( j=1; j<=COLUMN+1; j++ ))
 		do
 			echo -e "| ${board[$i,$j]} \c"
 		done
@@ -69,7 +69,7 @@ function checkWin()
 {
 	match3=0
 	match4=0
-
+	win=0
 	for (( i=1; i<=3; i++ ))
 	do
 		match1=0
@@ -92,13 +92,13 @@ function checkWin()
 			fi
 		done
 
-		#diagonal one
+		#diagonalOne
 		if [[ ${board[$i,$i]} == $1 ]]
 		then
 			match3=$((match3+1))
 		fi
 
-		#diagonaltwo
+		#diagonalTwo
 		for (( y=1; y<=3; y++ ))
 		do
 			add=$((i+y))
@@ -110,11 +110,7 @@ function checkWin()
 
 	if [[ $match1 == 3 || $match2 == 3 || $match3 == 3 || $match4 == 3 ]]
 	then
-		echo "!!! $1 wins !!!"
-		exit
-	elif [[ $count == 9 ]]
-	then
-		echo "!!! Tie !!!"
+		win=1
 	fi
 	done
 	count=$((count+1))
@@ -129,11 +125,36 @@ function playingGame()
 		board[$row1,$column1]=$currentPlayer
 		playBoard
 		checkWin $currentPlayer
-		changePlayer $currentPlayer
+		if [[ $win == 1 ]]
+		then
+			echo "$currentPlayer wins"
+			exit
+		fi
+			changePlayer $currentPlayer
 	else
-		echo "No place"
+		echo "No Space available"
 	fi
 }
+#checkwin before playing game
+function computerPlayToWin()
+{
+	for (( m=1; m<=ROW; m++ ))
+	do
+		for (( n=1; n<=COLUMN; n++ ))
+		do
+			if [[ ${borad[$m,$n]} == "-" ]]
+			then
+				board[$m,$n]=$currentPlayer
+				checkWin $currentPlayer
+				if [[ $win == 0 ]]
+				then
+					board[$m,$n]="-"
+				fi
+			fi
+		done
+	done
+}
+
 resettingBoard
 tossToPlayFirst
 playBoard
@@ -146,9 +167,15 @@ do
 		read -p "Enter column position: " columnPosition
 		playingGame $rowPosition $columnPosition
 	else
+		echo -e "\nComputer turn :\n"
+		computerPlayToWin
 		rowPosition=$((RANDOM%3+1))
 		columnPosition=$((RANDOM%3+1))
 		playingGame $rowPosition $columnPosition
 	fi
 done
 
+if [[ $win == 0 ]]
+then
+	echo "Game Tie"
+fi
