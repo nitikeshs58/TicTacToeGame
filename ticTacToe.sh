@@ -3,24 +3,25 @@
 echo "Welcome to Tic Tac Toe game."
 
 declare -A board
+
 #constants
 ROW=3
 COLUMN=3
+TOTALCOUNT=9
 
 count=1
 
 #setting board
 function resettingBoard()
 {
-	for (( i=1; i<=$ROW; i++ ))
+	for (( row=1; row<=$ROW; row++ ))
 	do
-		for (( j=1; j<=$COLUMN; j++ ))
+		for (( column=1; column<=$COLUMN; column++ ))
 		do
-			board[$i,$j]="-"
+			board[$row,$column]="-"
 		done
 	done
 }
-
 
 function letterAssignment()
 {
@@ -48,11 +49,11 @@ function tossToPlayFirst()
 function playBoard()
 {
 	echo -e "$===========$"
-	for (( i=1; i<=ROW; i++ ))
+	for (( row=1; row<=ROW; row++ ))
 	do
-		for (( j=1; j<=COLUMN+1; j++ ))
+		for (( column=1; column<=COLUMN+1; column++ ))
 		do
-			echo -e "| ${board[$i,$j]} \c"
+			echo -e "| ${board[$row,$column]} \c"
 		done
 	echo -e "\n$===========$"
 	done
@@ -110,7 +111,6 @@ function checkWin()
 				match4=$((match4+1))
 			fi
 		done
-
 	if [[ $match1 == 3 || $match2 == 3 || $match3 == 3 || $match4 == 3 ]]
 	then
 		win=1
@@ -139,14 +139,41 @@ function playingGame()
 	fi
 }
 
+#when corners and center is not avalible
+function checkSides()
+{
+	if [[ block == 0 ]]
+	then
+		for (( row=1; row<=$ROW; row++ ))
+		do
+			for ((column=1; column<=$COLUMN; column++ ))
+			do
+				sum=$((row+column))
+				if [[ $sum == 3 || $sum == 5 ]]
+				then
+					if [[ ${board[$row,$column]} == "-" ]]
+					then
+						board[$row,$column]=$1
+						playBoard
+						win=0
+						((count++))
+						block=1
+					fi
+				fi
+			done
+		done
+	fi
+}
 #when corners are not available then select center
 function checkCenter()
 {
+	row=$((ROW/2+1))
+	column=$((COLUMN/2+1))
 	if [[ $block == 0 ]]
 	then
-		if [[ ${board[$2,$3]} == "-" ]]
+		if [[ ${board[$row,$column]} == "-" ]]
 		then
-			board[$2,$3]=$1
+			board[$row,$column]=$1
 			playboard
 			win=0
 			((count++))
@@ -159,13 +186,13 @@ function checkCorners()
 {
 	if [[ $block == 0 ]]
 	then
-		for (( a=1; a<=$ROW; $((a+=2)) ))
+		for (( row=1; row<=$ROW; $((row+=2)) ))
 		do
-			for (( b=1; b<=$COLUMN; $((b+=2)) ))
+			for (( column=1; column<=$COLUMN; $((column+=2)) ))
 			do
-				if [[ ${board[$a,$b]} == "-" ]]
+				if [[ ${board[$row,$column]} == "-" ]]
 				then
-					board[$a,$b]=$currentPlayer
+					board[$row,$column]=$currentPlayer
 					playBoard
 					win=0
 					((count++))
@@ -185,25 +212,25 @@ function checkCorners()
 function computerPlayToWin()
 {
 	block=0
-	for (( m=1; m<=$ROW; m++ ))
+	for (( row=1; row<=$ROW; row++ ))
 	do
-		for (( n=1; n<=$COLUMN; n++ ))
+		for (( column=1; column<=$COLUMN; column++ ))
 		do
-			if [[ ${board[$m,$n]} == "-" ]]
+			if [[ ${board[$row,$column]} == "-" ]]
 			then
-				board[$m,$n]=$1
+				board[$row,$column]=$1
 				checkWin $1
 				if [[ $win == 0 ]]
 				then
-					board[$m,$n]="-"
-				elif [[ $win == 1 && ${board[$m,$n]} == $currentPlayer ]]
+					board[$row,$column]="-"
+				elif [[ $win == 1 && ${board[$row,$column]} == $currentPlayer ]]
 				then
 					playBoard
 					echo "!!! $currentPlayer wins !!!"
 					exit
 				elif [[ $win == 1 ]]
 				then
-					board[$m,$n]=$currentPlayer
+					board[$row,$column]=$currentPlayer
 					playBoard
 					win=0
 					block=1
@@ -223,7 +250,7 @@ resettingBoard
 tossToPlayFirst
 playBoard
 
-while [[ $count -le 9 ]]
+while [[ $count -le $TOTALCOUNT ]]
 do
 	if [[ $currentPlayer == "X" ]]
 	then
@@ -236,9 +263,8 @@ do
 		computerPlayToWin $currentPlayer
 		computerPlayToWin $nextPlayer
 		checkCorners $currentPlayer
-		row=$((ROW/2+1))
-		column=$((COLUMN/2+1))
-		checkCenter $currentPlayer $row $column
+		checkCenter $currentPlayer
+		checkSides $currentPlayer
 		if [[ $block == 0 ]]
 		then
 			rowPosition=$((RANDOM%3+1))
