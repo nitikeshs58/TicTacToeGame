@@ -6,7 +6,10 @@ declare -A board
 #constants
 ROW=3
 COLUMN=3
+
 count=1
+
+#setting board
 function resettingBoard()
 {
 	for (( i=1; i<=$ROW; i++ ))
@@ -17,6 +20,7 @@ function resettingBoard()
 		done
 	done
 }
+
 
 function letterAssignment()
 {
@@ -135,6 +139,22 @@ function playingGame()
 	fi
 }
 
+#when corners are not available then select center
+function checkCenter()
+{
+	if [[ $block == 0 ]]
+	then
+		if [[ ${board[$2,$3]} == "-" ]]
+		then
+			board[$2,$3]=$1
+			playboard
+			win=0
+			((count++))
+			block=1
+		fi
+	fi
+}
+
 function checkCorners()
 {
 	if [[ $block == 0 ]]
@@ -159,8 +179,8 @@ function checkCorners()
 			fi
 		done
 	fi
-
 }
+
 #checkwin before playing game
 function computerPlayToWin()
 {
@@ -216,6 +236,9 @@ do
 		computerPlayToWin $currentPlayer
 		computerPlayToWin $nextPlayer
 		checkCorners $currentPlayer
+		row=$((ROW/2+1))
+		column=$((COLUMN/2+1))
+		checkCenter $currentPlayer $row $column
 		if [[ $block == 0 ]]
 		then
 			rowPosition=$((RANDOM%3+1))
