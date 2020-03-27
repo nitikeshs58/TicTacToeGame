@@ -113,7 +113,6 @@ function checkWin()
 		win=1
 	fi
 	done
-	count=$((count+1))
 }
 
 function playingGame()
@@ -125,6 +124,7 @@ function playingGame()
 		board[$row1,$column1]=$currentPlayer
 		playBoard
 		checkWin $currentPlayer
+		((count++))
 		if [[ $win == 1 ]]
 		then
 			echo "$currentPlayer wins"
@@ -138,20 +138,38 @@ function playingGame()
 #checkwin before playing game
 function computerPlayToWin()
 {
-	for (( m=1; m<=ROW; m++ ))
+	block=0
+	for (( m=1; m<=$ROW; m++ ))
 	do
-		for (( n=1; n<=COLUMN; n++ ))
+		for (( n=1; n<=$COLUMN; n++ ))
 		do
-			if [[ ${borad[$m,$n]} == "-" ]]
+			if [[ ${board[$m,$n]} == "-" ]]
 			then
-				board[$m,$n]=$currentPlayer
-				checkWin $currentPlayer
+				board[$m,$n]=$1
+				checkWin $1
 				if [[ $win == 0 ]]
 				then
 					board[$m,$n]="-"
+				elif [[ $win == 1 && ${board[$m,$n]} == $currentPlayer ]]
+				then
+					playBoard
+					echo "!!! $currentPlayer wins !!!"
+					exit
+				elif [[ $win == 1 ]]
+				then
+					board[$m,$n]=$currentPlayer
+					playBoard
+					win=0
+					block=1
+					count=$((count+1))
+					break
 				fi
 			fi
 		done
+		if [[ $block == 1 ]]
+		then
+			break
+		fi
 	done
 }
 
@@ -168,10 +186,17 @@ do
 		playingGame $rowPosition $columnPosition
 	else
 		echo -e "\nComputer turn :\n"
-		computerPlayToWin
-		rowPosition=$((RANDOM%3+1))
-		columnPosition=$((RANDOM%3+1))
-		playingGame $rowPosition $columnPosition
+		nextPlayer="X"
+		computerPlayToWin $currentPlayer
+		computerPlayToWin $nextPlayer
+		if [[ $block == 0 ]]
+		then
+			rowPosition=$((RANDOM%3+1))
+			columnPosition=$((RANDOM%3+1))
+			playingGame $rowPosition $columnPosition
+		else
+			changePlayer $currentPlayer
+		fi
 	fi
 done
 
